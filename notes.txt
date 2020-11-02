@@ -1,0 +1,1 @@
+Database Panel: https://console.cloud.google.com/firestore/data/?authuser=1&project=lilac2

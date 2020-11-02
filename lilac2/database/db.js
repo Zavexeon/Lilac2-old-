@@ -1,0 +1,49 @@
+const admin = require('firebase-admin')
+
+admin.initializeApp({
+    credential: admin.credential.cert(
+        require('./key.js')
+    )
+})
+
+const db = admin.firestore()
+
+const database = {
+    addGuild: async guildObj => {
+        /*
+        guildObj = {
+            id: <guild-id>,
+        }
+        */
+        db.collection('guilds').doc(guildObj.id)
+            .set({
+                prefix: '!lilac',
+                enabledModules: ['standard']
+            })
+    },
+
+    getGuild: async guildId => {
+        guildDoc = db.collection('guilds').doc(guildId)
+        return new Promise((resolve, reject) => {
+            guildDoc.get()
+                .then(snapshot => {
+                    if (snapshot.exists) {
+                        guildDoc.onSnapshot(doc => {
+                            resolve(doc.data())
+                        })
+                    } else {
+                        database.addGuild({id: guildId})
+                    }
+            })
+        })
+    },
+
+    guildSetPrefix: async (guildId, prefix) => {
+        db.collection('guilds').doc(guildId)
+            .update({
+                prefix: prefix
+            })
+    }
+}
+
+module.exports = database
