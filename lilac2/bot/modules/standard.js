@@ -58,7 +58,7 @@ module.exports = (bot, cache) => {
                 callback: async (message, guild, args) => {
                     await db.guildSetPrefix(message.guild.id, args[0])
                     await cache.updateGuildCache(message.guild.id)
-                    await message.channel.send(`Updated prefix to \`${prefix}\`.`)
+                    await message.channel.send(`Updated prefix to \`${args[0]}\`.`)
                 }
             }
         }

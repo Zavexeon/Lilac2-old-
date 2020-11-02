@@ -8,6 +8,7 @@ const Discord = require('discord.js'),
 lilac.commands = {} 
 lilac.modules = {}
 
+console.log('Loading modules...')
 modules.forEach(module => {
     for (command in module.commands) {
         let commandObject = module.commands[command] 
@@ -15,7 +16,9 @@ modules.forEach(module => {
         lilac.commands[command] = commandObject
     }
     lilac.modules[module.name] = {description: module.description}
+    console.log(`\tLoaded ${module.name} module`)
 })
+console.log('Modules loaded')
 
 lilac.on('ready', () => {
     if (config.replit) {
@@ -52,8 +55,6 @@ lilac.on('message', async message => {
                 
                 const maxArgs = command.maxArgs || 0
                       minArgs = command.minArgs || 0
-
-                console.log(args)
 
                 if((minArgs <= args.length) && (maxArgs >= args.length)) {      
                     lilac.commands[command.callback(message, guild, args)]
