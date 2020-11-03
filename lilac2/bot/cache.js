@@ -11,6 +11,7 @@ let cache = {
 
     clear: () => {
         // clears the cache to prevent memory overload
+        cache.guilds = null
         cache.guilds = {}
     },
 

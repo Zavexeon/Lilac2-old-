@@ -5,6 +5,8 @@ const Discord = require('discord.js'),
       modules = require('./modules/modules.js')(lilac, cache),
       config  = require('../config.js')
 
+let guildCount = 0
+
 lilac.commands = {} 
 lilac.modules = {}
 
@@ -28,7 +30,7 @@ lilac.on('ready', () => {
                 res.end('Bot is online!')
             })
             .listen(3000)
-    }
+    }    
     console.log('Bot is ready!')
 })
 
@@ -40,44 +42,67 @@ lilac.on('message', async message => {
     }
     let guild = cache.getGuild(discordGuild.id)
 
+    if (message.isMemberMentioned(lilac.user)) {
+        message.channel.send({embed: {
+            title: 'Hiya!',
+            description: `Hey there, my prefix is \`${guild.prefix}\`! Try running \`${guild.prefix} help\`!`,
+            color: 11219690
+        }})
+    } else {
+        const splitMessage = message.content.split(/\s+/)
+        if (splitMessage[0] === guild.prefix) {
+            if (splitMessage[1] in lilac.commands) {
+                const command = lilac.commands[splitMessage[1]]
 
-    const splitMessage = message.content.split(/\s+/)
-    if (splitMessage[0] === guild.prefix) {
-        if (splitMessage[1] in lilac.commands) {
-            const command = lilac.commands[splitMessage[1]]
+                function executeCommand() {
+                    // shift twice to remove first two strings (<prefix> <command>)
+                    splitMessage.shift()
+                    splitMessage.shift() 
 
-            function executeCommand() {
-                // shift twice to remove first two strings (<prefix> <command>)
-                splitMessage.shift()
-                splitMessage.shift() 
-
-                let args = splitMessage
+                    let args = splitMessage
                 
-                const maxArgs = command.maxArgs || 0
-                      minArgs = command.minArgs || 0
+                    const maxArgs = command.maxArgs || 0
+                        minArgs = command.minArgs || 0
 
-                if((minArgs <= args.length) && (maxArgs >= args.length)) {      
-                    lilac.commands[command.callback(message, guild, args)]
-                } else {
-                    message.channel.send('aRgumENT cOUnt ErroR reeeeeee (temp error message)')
+                    if((minArgs <= args.length) && (maxArgs >= args.length)) {      
+                        lilac.commands[command.callback(message, guild, args)]
+                    } else {
+                        message.channel.send('aRgumENT cOUnt ErroR reeeeeee (temp error message)')
+                    }
                 }
-            }
 
-            if (guild.enabledModules.includes(command.from)) {
-                if (command.requiredPerms) {
-                    if(message.member.hasPermissions(command.requiredPerms)) {
+                if (guild.enabledModules.includes(command.from)) {
+                    if (command.requiredPerms) {
+                        if(message.member.hasPermission(command.requiredPerms)) {
+                            executeCommand()
+                        } else {
+                            message.channel.send('Missing Permission '+command.requiredPerms)
+                        }
+                    } else {
                         executeCommand()
                     }
-                } else {
-                    executeCommand()
                 }
-            }
-        } 
+            } 
+        }
     }
 })
 
 lilac.on('guildCreate', async guild => await db.addGuild({id: guild.id}))
 
 lilac.setTimeout(() => cache.clear(), 1800000) // clears cache every 30 minutes
+
+const lilacPresences = [
+    {
+        game: {
+            type: 'WATCHING',
+            name: `for pings!`
+        }
+    }
+]
+let presenceCount = 0
+lilac.setTimeout(() => {
+    if (presenceCount === lilacPresences.length - 1) presenceCount = 0
+    lilac.user.setPresence(lilacPresences[presenceCount])
+}, 5000)
 
 lilac.login(config.token)

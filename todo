@@ -1,2 +1,3 @@
 Add bot statuses: "Ping for prefix!", "Listening in x servers"
 On ping return prefix for guild. 
+Take permissions for commands into account.
