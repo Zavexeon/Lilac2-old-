@@ -27,7 +27,7 @@ let cache = {
         cache.guilds[id] = guildObj
     },
 
-    moduleEnabled: module => {
+    moduleEnabled: (id, module) => {
         return cache.guilds[id].enabledModules.includes(module)
     },
 

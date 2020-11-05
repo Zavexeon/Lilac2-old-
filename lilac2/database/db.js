@@ -43,6 +43,30 @@ const database = {
             .update({
                 prefix: prefix
             })
+    },
+
+    guildEnableModule: async (guildId, module) => {
+        db.collection('guilds').doc(guildId)
+            .update({
+                enabledModules: admin.firestore.FieldValue.arrayUnion(module)
+            })
+    },
+
+    guildDisableModule: async (guildId, module) => {
+        db.collection('guilds').doc(guildId)
+            .update({
+                enabledModules: admin.firestore.FieldValue.arrayRemove(module)
+            })
+    },
+
+    addModeration: guildId => {
+        db.collection('guilds').doc(guildId)
+            .update({
+                moderation: {
+                    bannedWords: [],
+                    logChannel: null
+                }
+            })  
     }
 }
 
