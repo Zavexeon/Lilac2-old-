@@ -7,7 +7,13 @@ module.exports = (bot, cache) => {
                 description: 'Hi dad im bored. dad: Hi bored',
                 minArgs: 1,
                 maxArgs: 1,
-              
+                arguments: ['name'],
+                callback: (message, guild, args) => {
+                    message.channel.send({embed: {
+                        title: 'Hello!',
+                        description: 'Hello ' + args[0]+'!'
+                    }})
+                }
             }
         }
     }
