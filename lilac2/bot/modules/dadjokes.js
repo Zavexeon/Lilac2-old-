@@ -1,6 +1,8 @@
+/* Courtesy of CodeMonkey51 */
+
 module.exports = (bot, cache) => {
     return {
-        name: 'dad jokes',
+        name: 'dad-jokes',
         description: 'eveyone likes dad jokes, this is a module to give you some',
         commands: {
             im: {
