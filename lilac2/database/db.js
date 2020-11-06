@@ -64,7 +64,8 @@ const database = {
             .update({
                 moderation: {
                     bannedWords: [],
-                    logChannel: null
+                    logChannel: null,
+                    filterEnabled: false,
                 }
             })  
     }

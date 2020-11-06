@@ -7,10 +7,12 @@ const Discord = require('discord.js'),
 
 //let guildCount = 0
 
-lilac.commands = {} 
-lilac.modules  = {}
-lilac.version  = config.version
-lilac.messageHooks = []
+lilac.commands     = {} 
+lilac.modules      = {}
+lilac.version      = config.version
+lilac.messageHooks = [],
+lilac.deleteHooks  = [],
+lilac.editHooks    = []
 
 lilac.error = errorText => {
     return {embed: {
@@ -24,9 +26,9 @@ lilac.error = errorText => {
 /* loads modules from modules/modules.js */
 console.log('Loading modules...')
 modules.forEach(module => {
-    if (module.messageHook) {
-        lilac.messageHooks.push(module.messageHook)
-    }
+    if (module.messageHook) lilac.messageHooks.push(module.messageHook)
+    if (module.deleteHook)  lilac.deleteHooks.push(module.deleteHook)
+    if (module.editHook)    lilac.editHooks.push(module.editHook)
 
     for (command in module.commands) {
         let commandObject = module.commands[command] 
@@ -38,7 +40,6 @@ modules.forEach(module => {
     console.log(`\tLoaded ${module.name} module`)
 })
 console.log('Modules loaded')
-
 
 lilac.on('ready', () => {
     if (config.replit) {
@@ -140,14 +141,23 @@ lilac.on('message', async message => {
     lilac.messageHooks.forEach(hook => hook(message)) // gives external modules a hook for listening to messages
 })
 
+lilac.on('messageDelete', async message => {
+    lilac.deleteHooks.forEach(hook => hook(message))
+})
+
+lilac.on('messageUpdate', async (messageOld, messageNew) => {
+    lilac.editHooks.forEach(hook => hook(messageOld, messageNew))
+})
+
 lilac.on('guildCreate', async guild => await db.addGuild({id: guild.id}))
 
 lilac.setInterval(() => cache.clear(), 1800000) // clears cache every 30 minutes
 
-
+/*
 lilac.setTimeout(() => {
     require('shelljs')
         .exec('./restart.sh')
 }, 21600000)
+*/
 
 lilac.login(config.token)

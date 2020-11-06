@@ -127,13 +127,15 @@ module.exports = (bot, cache) => {
                     
                     if (args[0] !== 'standard') {
                         const guildObj = await db.getGuild(message.guild.id)
-                        if (guildObj.moduleEnabled(args[0])) {
+
+                        if (cache.moduleEnabled(message.guild.id, args[0])) {
                             await db.guildDisableModule(message.guild.id, args[0])
                             toggleStatus = 'disabled'
                         } else {
                             await db.guildEnableModule(message.guild.id, args[0])
                             toggleStatus = 'enabled'
                         }
+                        
                         await cache.updateGuildCache(message.guild.id)
                         await message.channel.send({embed: {
                             title: 'Toggled Module',
@@ -166,6 +168,14 @@ module.exports = (bot, cache) => {
                     }, args.length * 280)
 
                     message.delete()
+                }
+            },
+            cache: {
+                description: 'Dumps cache for this guild.',
+                requiredPerms: ['MANAGE_MESSAGES'],
+                callback: (message, guild, args) => {
+                    let prettyString = JSON.stringify(cache.getGuild(message.guild.id), null, '\t')
+                    message.channel.send(`\`\`\`js\n${prettyString}\n\`\`\``, null, 4)
                 }
             }
         }
