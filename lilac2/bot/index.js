@@ -3,7 +3,8 @@ const Discord = require('discord.js'),
       db      = require('../database/db.js'),
       cache   = require('./cache.js'),
       modules = require('./modules/modules.js')(lilac, cache),
-      config  = require('../config.js')
+      config  = require('../config.js'),
+      os      = require('os')
 
 //let guildCount = 0
 
@@ -68,6 +69,12 @@ lilac.on('ready', () => {
                     type: 'LISTENING',
                     name: `${lilac.guilds.size} servers!`
                 }
+            },
+            {
+                game: {
+                    type: 'PLAYING', 
+                    name: `with ${Math.round((os.totalmem() - os.freemem()) / 10000000)}/${Math.round(os.totalmem() / 10000000)}mb of ram!`
+                }
             }
         ]
 
@@ -78,67 +85,69 @@ lilac.on('ready', () => {
 })
 
 lilac.on('message', async message => {
-    if (!message.author.bot) { // ignores bot messages
-        const discordGuild = message.guild // discord.js guild object
+    if (message.guild !== null) { //ignores all messages not in a server
+        if (!message.author.bot) { // ignores bot messages
+            const discordGuild = message.guild // discord.js guild object
 
 
-        /* checks cache for guild, if not present adds to cache from database */
-        if (!cache.hasGuild(discordGuild.id)) {
-            cache.addGuild(discordGuild.id, await db.getGuild(discordGuild.id))
-        }
-        let guild = cache.getGuild(discordGuild.id)
+            /* checks cache for guild, if not present adds to cache from database */
+            if (!cache.hasGuild(discordGuild.id)) {
+                cache.addGuild(discordGuild.id, await db.getGuild(discordGuild.id))
+            }
+            let guild = cache.getGuild(discordGuild.id)
 
-        if (message.isMemberMentioned(lilac.user)) {
-            message.channel.send({embed: {
-                title: 'Hiya!',
-                description: `Hey there, my prefix is \`${guild.prefix}\`! Try running \`${guild.prefix} help\`!`,
-                color: 11219690
-            }})
-        } else {
-            const splitMessage = message.content.split(/\s+/)
+            if (message.isMemberMentioned(lilac.user)) {
+                message.channel.send({embed: {
+                    title: 'Hiya!',
+                    description: `Hey there, my prefix is \`${guild.prefix}\`! Try running \`${guild.prefix} help\`!`,
+                    color: 11219690
+                }})
+            } else {
+                const splitMessage = message.content.split(/\s+/)
 
-            if (splitMessage[0] === guild.prefix) {
-                if (splitMessage[1] in lilac.commands) {
-                    const command = lilac.commands[splitMessage[1]]
+                if (splitMessage[0] === guild.prefix) {
+                    if (splitMessage[1] in lilac.commands) {
+                        const command = lilac.commands[splitMessage[1]]
 
-                    function executeCommand() {
-                        // shift twice to remove first two strings (<prefix> <command>)
-                        splitMessage.shift()
-                        splitMessage.shift() 
+                        function executeCommand() {
+                            // shift twice to remove first two strings (<prefix> <command>)
+                            splitMessage.shift()
+                            splitMessage.shift() 
 
-                        let args = splitMessage
+                            let args = splitMessage
                 
-                        const maxArgs = command.maxArgs || 0
-                              minArgs = command.minArgs || 0
+                            const maxArgs = command.maxArgs || 0
+                                  minArgs = command.minArgs || 0
 
-                        if((minArgs <= args.length) && (maxArgs >= args.length)) {      
-                            lilac.commands[command.callback(message, guild, args)]
-                        } else {
-                            let argString = ''
-                            if (command.arguments) {
-                                command.arguments.forEach(argument => argString += `<${argument}> `)
-                            }
-                            message.channel.send(lilac.error(`This command takes **${minArgs}-${maxArgs}** arguments. Example: \`${guild.prefix} ${argString}\``))
-                        }
-                    }
-
-                    if (guild.enabledModules.includes(command.from)) {
-                        if (command.requiredPerms) {
-                            if(message.member.hasPermission(command.requiredPerms)) {
-                                executeCommand()
+                            if((minArgs <= args.length) && (maxArgs >= args.length)) {      
+                                lilac.commands[command.callback(message, guild, args)]
                             } else {
-                                message.channel.send('Missing Permission '+command.requiredPerms)
+                                let argString = ''
+                                if (command.arguments) {
+                                    command.arguments.forEach(argument => argString += `<${argument}> `)
+                                }
+                                message.channel.send(lilac.error(`This command takes **${minArgs}-${maxArgs}** arguments. Example: \`${guild.prefix} ${argString}\``))
                             }
-                        } else {
-                            executeCommand()
                         }
-                    }
-                } 
+
+                        if (guild.enabledModules.includes(command.from)) {
+                            if (command.requiredPerms) {
+                                if(message.member.hasPermission(command.requiredPerms)) {
+                                    executeCommand()
+                                } else {
+                                    message.channel.send('Missing Permission '+command.requiredPerms)
+                                }
+                            } else {
+                                executeCommand()
+                            }
+                        }
+                    } 
+                }
             }
         }
-    }
 
-    lilac.messageHooks.forEach(hook => hook(message)) // gives external modules a hook for listening to messages
+        lilac.messageHooks.forEach(hook => hook(message)) // gives external modules a hook for listening to messages
+    }
 })
 
 lilac.on('messageDelete', async message => {

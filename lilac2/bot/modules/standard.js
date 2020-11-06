@@ -135,7 +135,7 @@ module.exports = (bot, cache) => {
                             await db.guildEnableModule(message.guild.id, args[0])
                             toggleStatus = 'enabled'
                         }
-                        
+
                         await cache.updateGuildCache(message.guild.id)
                         await message.channel.send({embed: {
                             title: 'Toggled Module',
@@ -175,7 +175,16 @@ module.exports = (bot, cache) => {
                 requiredPerms: ['MANAGE_MESSAGES'],
                 callback: (message, guild, args) => {
                     let prettyString = JSON.stringify(cache.getGuild(message.guild.id), null, '\t')
-                    message.channel.send(`\`\`\`js\n${prettyString}\n\`\`\``, null, 4)
+                    message.author.send({embed: {
+
+                        title: `${message.guild.name} Cache`,
+                        description: `\`\`\`js\n${prettyString}\n\`\`\``
+                    }})
+
+                    message.channel.send({embed: {
+                        title: 'Cache Sent',
+                        description: 'Sent you the cache! :thumbsup:'
+                    }})
                 }
             }
         }
