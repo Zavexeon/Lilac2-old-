@@ -128,19 +128,24 @@ module.exports = (bot, cache) => {
                     if (args[0] !== 'standard') {
                         const guildObj = await db.getGuild(message.guild.id)
 
-                        if (cache.moduleEnabled(message.guild.id, args[0])) {
-                            await db.guildDisableModule(message.guild.id, args[0])
-                            toggleStatus = 'disabled'
-                        } else {
-                            await db.guildEnableModule(message.guild.id, args[0])
-                            toggleStatus = 'enabled'
-                        }
+                        if (args[0] in bot.modules) {
+                            if (cache.moduleEnabled(message.guild.id, args[0])) {
+                                await db.guildDisableModule(message.guild.id, args[0])
+                                toggleStatus = 'disabled'
+                            } else {
+                                await db.guildEnableModule(message.guild.id, args[0])
+                                toggleStatus = 'enabled'
+                            }
 
-                        await cache.updateGuildCache(message.guild.id)
-                        await message.channel.send({embed: {
-                            title: 'Toggled Module',
-                            description: `The module **${args[0]}** has been ${toggleStatus}.`
-                        }})
+                            await message.channel.send({embed: {
+                                title: 'Toggled Module',
+                                description: `The module **${args[0]}** has been ${toggleStatus}.`
+                            }})
+
+                            await cache.updateGuildCache(message.guild.id)
+                        } else {
+                            await message.channel.send(bot.error('Module does not exist.'))
+                        }
                     } else {
                         await message.channel.send(bot.error("You can't disable the standard module, silly!"))
                     }

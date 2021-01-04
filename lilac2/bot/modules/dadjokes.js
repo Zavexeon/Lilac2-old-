@@ -8,12 +8,12 @@ module.exports = (bot, cache) => {
             im: {
                 description: 'Hi dad im bored. dad: Hi bored',
                 minArgs: 1,
-                maxArgs: 1,
+                maxArgs: 1000,
                 arguments: ['name'],
                 callback: (message, guild, args) => {
                     message.channel.send({embed: {
                         title: 'Hello!',
-                        description: 'Hello ' + args[0]+'!'
+                        description: 'Hello ' + args.join(' ') +'!'
                     }})
                 }
             }

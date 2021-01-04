@@ -8,11 +8,12 @@ const Discord = require('discord.js'),
 
 //let guildCount = 0
 
+/* add some properties to the bot */
 lilac.commands     = {} 
 lilac.modules      = {}
 lilac.version      = config.version
-lilac.messageHooks = [],
-lilac.deleteHooks  = [],
+lilac.messageHooks = []
+lilac.deleteHooks  = []
 lilac.editHooks    = []
 
 lilac.error = errorText => {
@@ -41,6 +42,8 @@ modules.forEach(module => {
     console.log(`\tLoaded ${module.name} module`)
 })
 console.log('Modules loaded')
+
+
 
 lilac.on('ready', () => {
     if (config.replit) {
@@ -83,6 +86,8 @@ lilac.on('ready', () => {
         presenceCount++
     }, 5000)
 })
+
+
 
 lilac.on('message', async message => {
     if (message.guild !== null) { //ignores all messages not in a server
@@ -150,15 +155,12 @@ lilac.on('message', async message => {
     }
 })
 
-lilac.on('messageDelete', async message => {
-    lilac.deleteHooks.forEach(hook => hook(message))
-})
-
-lilac.on('messageUpdate', async (messageOld, messageNew) => {
-    lilac.editHooks.forEach(hook => hook(messageOld, messageNew))
-})
+lilac.on('messageDelete', async message => lilac.deleteHooks.forEach(hook => hook(message)))
+lilac.on('messageUpdate', async (messageOld, messageNew) => lilac.editHooks.forEach(hook => hook(messageOld, messageNew)))
 
 lilac.on('guildCreate', async guild => await db.addGuild({id: guild.id}))
+
+
 
 lilac.setInterval(() => cache.clear(), 1800000) // clears cache every 30 minutes
 
