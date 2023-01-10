@@ -12,7 +12,7 @@
   "dependencies": {
     "-": "0.0.1",
     "discord.js": "^11.6.4",
-    "firebase-admin": "^9.2.0",
+    "firebase-admin": "^11.4.1",
     "n": "^6.7.0",
     "shelljs": "^0.8.4",
     "stable": "^0.1.8"
